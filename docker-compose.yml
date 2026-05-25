@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: breathe_esg_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: breathe_esg
+      POSTGRES_USER: breathe
+      POSTGRES_PASSWORD: breathe_dev_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U breathe -d breathe_esg"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: breathe_esg_api
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.docker
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.development
+      DATABASE_URL: postgres://breathe:breathe_dev_password@db:5432/breathe_esg
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./sample_data:/sample_data:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
