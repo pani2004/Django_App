@@ -6,7 +6,13 @@ from decimal import Decimal, InvalidOperation
 
 def read_csv_rows(file_content: bytes, delimiter: str = ",") -> list[dict]:
     text = file_content.decode("utf-8-sig")
-    reader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
+    # Skip # comment lines (sample_data files document format on line 1)
+    lines = [
+        line
+        for line in text.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    reader = csv.DictReader(io.StringIO("\n".join(lines)), delimiter=delimiter)
     return [dict(row) for row in reader]
 
 

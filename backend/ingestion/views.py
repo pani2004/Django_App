@@ -20,16 +20,40 @@ class BatchUploadView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
-        source = request.data.get("source", "").upper()
+        source_raw = request.data.get("source", "")
         file = request.FILES.get("file")
+
+        # Postman/clients sometimes attach the CSV to "source" by mistake
+        if not file and hasattr(source_raw, "read"):
+            file = source_raw
+            source_raw = request.data.get("source_type") or request.POST.get("source", "")
+
+        if isinstance(source_raw, str):
+            source = source_raw.strip().upper()
+        else:
+            source = ""
+
+        if not source and file:
+            return Response(
+                {
+                    "detail": (
+                        "Missing text field 'source'. Use form-data: source=SAP (Text) "
+                        "and file=<csv> (File). Do not put the CSV on the source field."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if source not in DataSource.values:
             return Response(
-                {"detail": "source must be SAP, UTILITY, or TRAVEL"},
+                {"detail": "source must be SAP, UTILITY, or TRAVEL (text field, not a file)."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if not file:
-            return Response({"detail": "file is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "file is required — attach the CSV on the 'file' field."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         content = file.read()
         batch = process_upload(
