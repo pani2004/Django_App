@@ -1,0 +1,7 @@
+# SAP ME2N-style ALV export: semicolon delimiter, German headers, mixed PROCUREMENT + FUEL
+record_type;Bestellung;Position;Material;Werk;Warengruppe;Bestellmenge;Bestellmengeneinheit;Nettowert;Währung;Bestelldatum;Lieferant;Energieträger;Verbrauchsmenge;Mengeneinheit;Buchungsdatum;Kostenstelle
+PROCUREMENT;4500123456;00010;10001234;1000;ROH;1.250,000;KG;15.432,18;EUR;15.03.2025;100234;;;
+PROCUREMENT;4500123457;00020;10009999;1000;ROH;500,000;;890,00;EUR;20.03.2025;100235;;;
+FUEL;;;;1000;;;;;;;;Diesel;12.450,5;L;31.03.2025;471100
+FUEL;;;;DE01;;;;;;;;Erdgas;850,25;m³;28.02.2025;471200
+PROCUREMENT;4500123458;00010;10005555;DE01;HIBE;2.500,000;STK;3.200,00;EUR;01.04.2025;100240;;;

@@ -1,0 +1,7 @@
+# Concur SAE-style flat export: one row per trip segment
+trip_id,employee_id,employee_email,expense_type,segment_type,transaction_date,origin_iata,destination_iata,cabin_class,distance_km,nights,vehicle_type,city,country,currency,amount_usd,cost_center,in_policy
+TRP-2025-00421,EMP-1042,jsmith@demo.breathe.local,Airfare,AIRFR,2025-03-12,SFO,ORD,Economy,2968,,,,,USD,412.00,CC-ENG-NA,Y
+TRP-2025-00421,EMP-1042,jsmith@demo.breathe.local,Airfare,AIRFR,2025-03-14,ORD,JFK,Economy,,,,,,USD,289.00,CC-ENG-NA,Y
+TRP-2025-00421,EMP-1042,jsmith@demo.breathe.local,Lodging,HOTEL,2025-03-12,,,,,2,,Chicago,US,USD,478.00,CC-ENG-NA,Y
+TRP-2025-00438,EMP-0881,alee@demo.breathe.local,Ground Transport,CARRT,2025-03-20,,,,,45,Rental Car,San Jose,US,USD,156.00,CC-SALES-NA,Y
+TRP-2025-00455,EMP-1203,mgarcia@demo.breathe.local,Rail,RAILF,2025-04-02,,,,,494,,Boston,US,USD,89.00,CC-CONS-NA,Y

@@ -1,0 +1,478 @@
+{
+  "info": {
+    "_postman_id": "breathe-esg-api-collection",
+    "name": "Breathe ESG API",
+    "description": "Django REST API for emissions ingestion and analyst review.\n\n**Setup**\n1. Import this file only.\n2. Run **Auth → Login** first — saves `access_token` to collection variables.\n3. For uploads, pick a file from `sample_data/` (SAP / utility / travel CSV).\n\n**Variables (edit in collection):** base_url, access_token, batch_id, activity_id\n**Default base_url:** http://localhost:8000\n**Demo user:** analyst@demo.breathe.local / demo-analyst-2025",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "batch_id",
+      "value": "1"
+    },
+    {
+      "key": "activity_id",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', data.access);",
+                  "    pm.collectionVariables.set('refresh_token', data.refresh);",
+                  "    pm.test('Login successful', () => pm.expect(data.access).to.be.a('string'));",
+                  "} else {",
+                  "    pm.test('Login failed', () => pm.expect.fail(pm.response.text()));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"analyst@demo.breathe.local\",\n  \"password\": \"demo-analyst-2025\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login", ""]
+            },
+            "description": "Obtain JWT access + refresh tokens. Runs seed_demo user from Docker startup."
+          },
+          "response": []
+        },
+        {
+          "name": "Me (current user)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "me", ""]
+            },
+            "description": "Returns logged-in user and organization. Requires Bearer token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Batches (upload)",
+      "item": [
+        {
+          "name": "Upload SAP CSV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "source",
+                  "value": "SAP",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/batches/upload/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "batches", "upload", ""]
+            },
+            "description": "IMPORTANT: source = Text value SAP (not a file). file = pick sap_export_de.csv from sample_data/"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Utility CSV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "source",
+                  "value": "UTILITY",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/batches/upload/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "batches", "upload", ""]
+            },
+            "description": "source = Text UTILITY. file = utility_portal.csv"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Travel CSV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "source",
+                  "value": "TRAVEL",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/batches/upload/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "batches", "upload", ""]
+            },
+            "description": "source = Text TRAVEL. file = travel_concur_style.csv"
+          },
+          "response": []
+        },
+        {
+          "name": "List batches",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const results = data.results || data;",
+                  "    if (Array.isArray(results) && results.length > 0) {",
+                  "        pm.collectionVariables.set('batch_id', String(results[0].id));",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/batches/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "batches", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Batch detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/batches/{{batch_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "batches", "{{batch_id}}", ""]
+            },
+            "description": "Includes raw_rows. Set batch_id from list or upload response."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Activities (review queue)",
+      "item": [
+        {
+          "name": "List activities (all)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const results = data.results || data;",
+                  "    if (Array.isArray(results) && results.length > 0) {",
+                  "        pm.collectionVariables.set('activity_id', String(results[0].id));",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activities/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List activities (pending)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activities/?review_status=pending",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", ""],
+              "query": [
+                {
+                  "key": "review_status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List activities (with quality flags)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activities/?has_flags=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", ""],
+              "query": [
+                {
+                  "key": "has_flags",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List activities (Scope 2)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activities/?scope=SCOPE_2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", ""],
+              "query": [
+                {
+                  "key": "scope",
+                  "value": "SCOPE_2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List activities (by source SAP)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activities/?source=SAP",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", ""],
+              "query": [
+                {
+                  "key": "source",
+                  "value": "SAP"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activity detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activities/{{activity_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", "{{activity_id}}", ""]
+            },
+            "description": "Normalized row + raw_row + emission estimate"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Review actions",
+      "item": [
+        {
+          "name": "Dashboard stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/stats/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "dashboard", "stats", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Reviewed and approved for audit.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/activities/{{activity_id}}/approve/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", "{{activity_id}}", "approve", ""]
+            },
+            "description": "Locks row (is_locked=true). Set activity_id variable first."
+          },
+          "response": []
+        },
+        {
+          "name": "Flag activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Suspicious quantity — needs facilities confirmation.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/activities/{{activity_id}}/flag/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", "{{activity_id}}", "flag", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reject activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Duplicate row from prior upload.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/activities/{{activity_id}}/reject/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", "{{activity_id}}", "reject", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activity audit log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activities/{{activity_id}}/audit/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", "{{activity_id}}", "audit", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk approve (no flags)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activities/bulk-approve/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activities", "bulk-approve", ""]
+            },
+            "description": "Approves all pending rows with empty quality_flags"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

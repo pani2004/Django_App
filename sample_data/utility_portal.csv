@@ -1,0 +1,6 @@
+# Utility customer portal export: one row per account per billing period (may not align to calendar month)
+facility_id,utility_name,account_number,meter_number,rate_schedule,bill_start_date,bill_end_date,usage_kwh,peak_demand_kw,total_cost_usd
+FAC-001,Pacific Gas and Electric,1234567890,MTR-88421,B-19 Medium General,2025-01-01,2025-01-31,84250,312.4,12487.33
+FAC-002,Con Edison,9876543210,MTR-11002,SC-9 Rate I,2025-01-05,2025-02-04,52100,,8912.50
+FAC-001,Pacific Gas and Electric,1234567890,MTR-88421,B-19 Medium General,2025-01-20,2025-02-19,79800,298.1,11804.90
+FAC-003,Duke Energy,5551234567,MTR-33001,GS-1,2025-02-01,2025-03-15,120500,410.0,18200.00
