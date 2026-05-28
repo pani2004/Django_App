@@ -10,8 +10,8 @@ function ProtectedRoutes() {
   const { user, loading } = useAuth();
   if (loading) {
     return (
-      <div className="login-page">
-        <p className="muted">Loading…</p>
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <p className="text-slate-500">Loading…</p>
       </div>
     );
   }
